@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Barber
 
-## Getting Started
+Aplicação de barbearia desenvolvida com Next.js para gerenciar barbearias, serviços, telefones, usuários e agendamentos.
 
-First, run the development server:
+## Tecnologias
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL
+- Docker
+
+## Pré-requisitos
+
+Antes de começar, instale:
+
+- [Node.js](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- npm
+
+O Docker Desktop precisa estar aberto para executar o PostgreSQL localmente.
+
+## Instalação
+
+Instale as dependências do projeto:
+
+```bash
+npm install
+```
+
+Crie um arquivo `.env` na raiz do projeto com a conexão do banco:
+
+```env
+DATABASE_URL="postgresql://barber:barber_dev@127.0.0.1:5433/barber?schema=public"
+```
+
+Os dados dessa URL correspondem à configuração presente no arquivo `compose.yml`.
+
+## Banco de dados com Docker
+
+Com o Docker Desktop aberto, inicie o PostgreSQL em segundo plano:
+
+```bash
+docker compose up -d
+```
+
+Confira o estado do container:
+
+```bash
+docker compose ps
+```
+
+Para acompanhar os logs do banco:
+
+```bash
+docker compose logs -f postgres
+```
+
+Para parar e remover o container sem apagar os dados:
+
+```bash
+docker compose down
+```
+
+Para reiniciar o banco:
+
+```bash
+docker compose restart postgres
+```
+
+> Não execute `docker compose down -v` a menos que queira apagar permanentemente o volume e todos os dados locais do banco.
+
+## Prisma e migrations
+
+Depois que o PostgreSQL estiver rodando, crie a primeira migration:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+Para alterações futuras no schema, use um nome que descreva a mudança:
+
+```bash
+npx prisma migrate dev --name nome_da_alteracao
+```
+
+Outros comandos úteis:
+
+```bash
+# Validar o schema
+npx prisma validate
+
+# Formatar o schema
+npx prisma format
+
+# Gerar o Prisma Client
+npx prisma generate
+
+# Abrir a interface para visualizar e editar os dados
+npx prisma studio
+```
+
+O schema está localizado em `prisma/schema.prisma` e as migrations são criadas em `prisma/migrations`.
+
+## Executando a aplicação
+
+Com o banco iniciado e as migrations aplicadas, execute:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts disponíveis
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev     # Inicia o ambiente de desenvolvimento
+npm run build   # Gera a versão de produção
+npm run start   # Executa a versão de produção
+npm run lint    # Verifica problemas no código
+```
 
-## Learn More
+## Estrutura principal
 
-To learn more about Next.js, take a look at the following resources:
+```text
+app/                  Aplicação Next.js
+prisma/
+  schema.prisma       Modelagem do banco de dados
+  migrations/         Histórico das migrations
+public/               Arquivos estáticos
+compose.yml            Configuração do PostgreSQL no Docker
+prisma.config.ts       Configuração do Prisma
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Fluxo rápido para desenvolvimento
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Nas próximas vezes em que abrir o projeto, o fluxo normal será:
 
-## Deploy on Vercel
+```bash
+docker compose up -d
+npx prisma migrate dev
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Ao terminar:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose down
+```
