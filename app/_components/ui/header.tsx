@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/app/_components/ui/card";
 const Header = () => {
   return (
     <Card className="w-full rounded-none border-x-0 border-t-0 py-0 shadow-sm">
-      <CardContent className="flex h-24 items-center justify-between px-5">
+      <CardContent className="flex  pr-0 pl-5 h-24 items-center justify-between">
         <Image
           src="/barberLogo.png"
           alt="Barbearia Clássica"
@@ -17,7 +17,12 @@ const Header = () => {
           priority
         />
 
-        <Button size="icon" variant="ghost" aria-label="Abrir menu">
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Abrir menu"
+          className="h-full w-20 rounded-none"
+        >
           <MenuIcon />
         </Button>
       </CardContent>
