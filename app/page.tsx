@@ -8,14 +8,23 @@ export default function Home() {
   return (
     <div className="px-5">
       <Header />
-      <div className="flex items-center gap-2 mt-3">
+      <div className="mt-3 flex items-center gap-2">
         <Input placeholder="Faça sua busca" />
-        <Button size="icon"><SearchIcon /></Button>
+        <Button size="icon">
+          <SearchIcon />
+        </Button>
       </div>
 
-      <Image src="/banner01.png" alt="bannerAgendarHorario"
-        width={1000} height={1000}
-        className="rounded-xl " />
+      <div className="relative mx-auto mt-5 aspect-video w-full max-w-3xl overflow-hidden rounded-xl shadow-md">
+        <Image
+          src="/banner01.png"
+          alt="Banner para agendar um horário"
+          fill
+          sizes="(max-width: 768px) calc(100vw - 2.5rem), 768px"
+          className="scale-[1.35] object-cover object-center"
+          priority
+        />
+      </div>
     </div>
   );
 }
