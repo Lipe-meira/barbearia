@@ -99,45 +99,161 @@ const barberShops = [
   },
 ];
 
+const users = [
+  { name: "Felipe Silva", email: "felipe@barber.dev" },
+  { name: "João Santos", email: "joao@barber.dev" },
+  { name: "Lucas Oliveira", email: "lucas@barber.dev" },
+  { name: "Pedro Almeida", email: "pedro@barber.dev" },
+];
+
+const bookingSeeds = [
+  {
+    id: "00000000-0000-4000-8000-000000000001",
+    userIndex: 0,
+    serviceIndex: 0,
+    daysFromToday: -2,
+    time: "09:00",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000002",
+    userIndex: 1,
+    serviceIndex: 1,
+    daysFromToday: 0,
+    time: "10:30",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000003",
+    userIndex: 2,
+    serviceIndex: 2,
+    daysFromToday: 1,
+    time: "14:00",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000004",
+    userIndex: 3,
+    serviceIndex: 3,
+    daysFromToday: 3,
+    time: "16:30",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000005",
+    userIndex: 0,
+    serviceIndex: 4,
+    daysFromToday: 7,
+    time: "11:00",
+  },
+];
+
 const description = "Barbearia especializada em cortes modernos, barba e cuidados masculinos.";
 
-async function main() {
-  let created = 0;
-  let skipped = 0;
+function dateFromToday(days: number) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return date;
+}
 
-  for (const [index, barberShop] of barberShops.entries()) {
+async function seedBarberShops() {
+  const firstBarberShopServices = [];
+
+  for (const [index, barberShopData] of barberShops.entries()) {
     const email = `contato${index + 1}@barber.dev`;
     const existingBarberShop = await prisma.barberShop.findFirst({
       where: { email },
       select: { id: true },
     });
 
-    if (existingBarberShop) {
-      skipped++;
-      continue;
+    const barberShop = existingBarberShop
+      ? await prisma.barberShop.update({
+          where: { id: existingBarberShop.id },
+          data: { ...barberShopData, email, description },
+        })
+      : await prisma.barberShop.create({
+          data: { ...barberShopData, email, description },
+        });
+
+    const phoneNumbers = [
+      `(11) 99999-${String(1000 + index).padStart(4, "0")}`,
+      `(11) 3333-${String(1000 + index).padStart(4, "0")}`,
+    ];
+
+    for (const number of phoneNumbers) {
+      const existingPhone = await prisma.phone.findFirst({
+        where: { barberShopId: barberShop.id, number },
+        select: { id: true },
+      });
+
+      if (!existingPhone) {
+        await prisma.phone.create({
+          data: { barberShopId: barberShop.id, number },
+        });
+      }
     }
 
-    await prisma.barberShop.create({
-      data: {
-        ...barberShop,
-        email,
-        description,
-        phones: {
-          create: [
-            { number: `(11) 99999-${String(1000 + index).padStart(4, "0")}` },
-            { number: `(11) 3333-${String(1000 + index).padStart(4, "0")}` },
-          ],
+    for (const serviceData of services) {
+      const existingService = await prisma.barberShopService.findFirst({
+        where: {
+          barberShopId: barberShop.id,
+          name: serviceData.name,
         },
-        services: {
-          create: services,
-        },
-      },
-    });
+        select: { id: true },
+      });
 
-    created++;
+      const service = existingService
+        ? await prisma.barberShopService.update({
+            where: { id: existingService.id },
+            data: serviceData,
+          })
+        : await prisma.barberShopService.create({
+            data: {
+              ...serviceData,
+              barberShopId: barberShop.id,
+            },
+          });
+
+      if (index === 0) {
+        firstBarberShopServices.push(service);
+      }
+    }
   }
 
-  console.log(`Seed concluído: ${created} barbearias criadas, ${skipped} ignoradas.`);
+  return firstBarberShopServices;
+}
+
+async function seedUsers() {
+  return Promise.all(
+    users.map((user) =>
+      prisma.user.upsert({
+        where: { email: user.email },
+        update: { name: user.name },
+        create: user,
+      }),
+    ),
+  );
+}
+
+async function main() {
+  const seededServices = await seedBarberShops();
+  const seededUsers = await seedUsers();
+
+  for (const booking of bookingSeeds) {
+    const data = {
+      userId: seededUsers[booking.userIndex].id,
+      serviceId: seededServices[booking.serviceIndex].id,
+      date: dateFromToday(booking.daysFromToday),
+      time: booking.time,
+    };
+
+    await prisma.booking.upsert({
+      where: { id: booking.id },
+      update: data,
+      create: { id: booking.id, ...data },
+    });
+  }
+
+  console.log(
+    `Seed concluído: ${barberShops.length} barbearias, ${seededServices.length * barberShops.length} serviços, ${seededUsers.length} usuários e ${bookingSeeds.length} agendamentos.`,
+  );
 }
 
 main()
