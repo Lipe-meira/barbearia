@@ -10,7 +10,7 @@ import {
 } from "@/app/_components/ui/carousel";
 import Image from "next/image";
 
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 
 type BookingItem = {
   id: string;

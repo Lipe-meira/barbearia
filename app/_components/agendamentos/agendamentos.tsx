@@ -1,6 +1,6 @@
 import { prisma } from "@/app/_lib/prisma";
 import { connection } from "next/server";
-import { CarrosselAgendamentos } from "@/app/_components/carrossel_agendamentos";
+import { CarrosselAgendamentos } from "@/app/_components/agendamentos/carrossel_agendamentos";
 
 export async function Agendamentos() {
   await connection();
