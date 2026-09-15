@@ -78,8 +78,7 @@ export function CarrosselAgendamentos({ bookings }: { bookings: BookingItem[] })
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
+    
     </Carousel>
   );
 }
